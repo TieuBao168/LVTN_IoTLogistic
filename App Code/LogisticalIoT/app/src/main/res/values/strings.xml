@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Logistical IoT</string>
+<!--    <string name="map_api_key">AIzaSyDpNkQSfFx6P9GlVPdisePZngnBVuFNGVs</string>-->
+    <string name="map_api_key">AIzaSyCv5LNsiSXeR2qmDejQKhL2treYUo8NfV4</string>
+    <string name="on">ON</string>
+    <string name="off">OFF</string>
+</resources>
