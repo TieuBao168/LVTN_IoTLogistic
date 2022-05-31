@@ -10,9 +10,10 @@
 
 DHTesp dht;
 
-unsigned long previousMillis = 0;  
+unsigned long previousMillis, pre, precious = 0;  
 const long interval = 1000; // giá trị delay (milliseconds)
-int consider = 0;
+int consider[2] = {1,1};
+uint32_t idRootnode;
 
 typedef struct{
   float humidity, temperature = 0;
@@ -27,15 +28,7 @@ void compareData();
 
 void sendMessage(uint32_t id, String Destination){
   Serial.println();
-  // Serial.println("Start Sending....");
-
-  // delay(dht.getMinimumSamplingPeriod());
-  // recent.humidity = round(dht.getHumidity()*100)/100;
-  // recent.temperature = roundf(dht.getTemperature()*100)/100;
-
-    // Serializing in JSON Format
   DynamicJsonDocument doc(1024);
-
   doc["Node"] = 2;
   doc["Temperature"] = recent.temperature;
   doc["Humidity"] = recent.humidity;
@@ -49,25 +42,14 @@ void sendMessage(uint32_t id, String Destination){
     mesh.sendBroadcast(msg);
   }
   
+  pre = millis();
+  consider[0] = 0;
+
   Serial.println("Message from Node Leaf: ");
   Serial.println(msg);
 
   //taskSendMessage.setInterval(TASK_SECOND * 5);
 }
-
-// void sendMessageWarn(){
-//   Serial.println();
-//   DynamicJsonDocument doc(1024);
-
-//   doc["Node"] = 4;
-//   doc["Temperature"] = recent.temperature;
-//   doc["Humidity"] = recent.humidity;
-
-//   String msg ;
-//   serializeJson(doc, msg); 
-//   // uint32_t id = 3323046497; // ID of RootNode
-//   mesh.sendBroadcast(msg);
-// }
 
 // Needed for painless library
 void receivedCallback(uint32_t from, String &msg ) {
@@ -77,18 +59,16 @@ void receivedCallback(uint32_t from, String &msg ) {
 
   if((msg == "Begin")||(msg == "Error")){
     sendMessage(from, "Single");
+    idRootnode = from;
+    consider[1] = 1;
   } else if(msg == "Warn"){
-    sendMessage(0, "Broadcast");
+    
+  } else if(msg == "Ok"){
+    consider[0] = 1;
   } else if(msg == "Again"){
-      mesh.sendSingle(from, "Warn");
+    mesh.sendSingle(from, "Warn");
   } else {
-    String json = msg.c_str();
-    DynamicJsonDocument doc(1024);
-    DeserializationError error = deserializeJson(doc, json);
-    if (error)
-    {
-      mesh.sendSingle(from, "Again");
-    }
+    mesh.sendSingle(from, "Again");
   }
 }
 
@@ -131,16 +111,26 @@ void loop() {
     previousMillis = currentMillis;
     compareData();
   }
+  if (currentMillis - pre >= 5*interval) {
+    if(consider[0] == 0){
+      sendMessage(idRootnode, "Single");
+    }
+  }
+  if (currentMillis - precious >= 5*interval) {
+    if(consider[1] == 0){
+      mesh.sendBroadcast("Warn");
+      consider[1] = 0; precious = currentMillis;
+    }
+  }
 }
 
 void compareData(){
-  // static int skip = 0;
   recent.humidity = roundf(dht.getHumidity()*100)/100;
   recent.temperature = roundf(dht.getTemperature()*100)/100;
   if((abs(recent.temperature - previous.temperature) > 2.0)||
   (abs(recent.humidity - previous.humidity) > 5.0)){
     mesh.sendBroadcast("Warn");
-    sendMessage(0, "Broadcast");
+    consider[1] = 0; precious = millis();
     previous.temperature = recent.temperature;
     previous.humidity = recent.humidity;
   }

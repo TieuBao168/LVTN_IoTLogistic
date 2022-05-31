@@ -6,15 +6,11 @@
 #include <string.h>
 #include <TinyGPS++.h> // library for GPS module
 #include <SoftwareSerial.h>
-
-// hw_timer_t* timer = NULL; //khơi tạo timer
-// portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED; 
-
 //Declare HTTP Protocol
 HTTPClient http;    //Declare object of class HTTPClient
 WiFiClient client;
 
-String apiKeyValue = "IoTLogistic", Vehicle = "1";
+String apiKeyValue = "IoTLogistic", Vehicle = "2";
 
 TinyGPSPlus gps;  // The TinyGPS++ object
 SoftwareSerial ss(3,1); // The serial connection to the GPS device  (Rx,Tx)
@@ -24,6 +20,7 @@ String lat_str = "0.000000", lng_str = "0.000000";
 // WiFiServer server(80);
 
 int cnt = 0, consider = 0;
+int Quantity = 0;
 // int firsttime = 0;
 
 float Temperature, Humidity, RSSI;
@@ -39,13 +36,13 @@ int Relay_Temp = 2;
 int Relay_Humi = 0;   // the number of the pushbutton pin
 // #define ledPin  2       // the number of the LED pin
 // Giá trị lần cuối cùng được cập nhật
-unsigned long previousMillis = 0;  
+unsigned long previousMillis = 0, pre = 0; 
 const long interval = 1000; // giá trị delay (milliseconds)
 
 //Connect Wifi
 #define ssid "Larcade"
 #define pass "987654321"
-const char* host = "192.168.1.13";
+// const char* host = "192.168.1.13";
 
 // byte stt_led = LOW;
 void Wifi_connect();
@@ -55,7 +52,7 @@ void Post_to_DB(String Table);
 void SaveValue();
 
 // Đường dẫn file Back-end
-const char* pathGetCtr = "http://luanvanlogistic.highallnight.com/app/control1/control1.json";
+const char* pathGetCtr = "http://luanvanlogistic.highallnight.com/app/control2/control2.json";
 const char* LinkWriteData = "http://luanvanlogistic.highallnight.com/app/postdata.php";
 
 // Control Relay
@@ -83,104 +80,77 @@ void sendMessage(); // Prototype so PlatformIO doesn't complain
 Task taskSendMessage( TASK_SECOND * 1 , TASK_FOREVER, &sendMessage );
 
 void sendMessage(){
-  Serial.println();
-  Serial.println("Start Sending....");
-
-  // String x = "Begin";
-  // x += mesh.getNodeId();
-  mesh.sendBroadcast("Begin");
-  // Serial.println(x);
+  if(Quantity > 0){
+    Serial.println();
+    Serial.println("Start Sending....");
+    // x += mesh.getNodeId();
+    mesh.sendBroadcast("Begin");
+    pre = millis();
+    consider = 0;
+  }
   taskSendMessage.setInterval(TASK_SECOND * 30);
 }
 
-// hàm xử lý ngắt
-// void IRAM_ATTR onTimer() {   
-//   portENTER_CRITICAL_ISR(&timerMux); //vào chế độ tránh xung đột
-
-//   // Post_to_DB("location");
-//   Serial.println("Interrupt Successfully \n");
-
-//   portEXIT_CRITICAL_ISR(&timerMux); // thoát 
-// }
-
-void setup() {
+void setup(){
   Serial.begin(115200);
   ss.begin(9600);
   Serial.println();
   Serial.println("--------------------------------------------------------");
   Serial.println("----------------------Start here!-----------------------");
-  
-  //   //khơit tạo timer với chu kì 1us vì thạch anh của ESP chạy 8MHz
-  // timer = timerBegin(0, 80, true);
-  // //khởi tạo hàm xử lý ngắt ngắt cho Timer
-  // timerAttachInterrupt(timer, &onTimer, true);
-  // //khởi tạo thời gian ngắt cho timer là 1s (1000000 us)
-  // timerAlarmWrite(timer, 5000000, true);
-  // //bắt đầu chạy timer
-  // timerAlarmEnable(timer);
 
   // initialize the pushbutton pin as an input
   pinMode(Relay_Temp, OUTPUT);
   pinMode(Relay_Humi, OUTPUT);
-  // initialize the LED pin as an output
-  // pinMode(ledPin, OUTPUT);
 
   mesh_setup();
-
   Wifi_connect();
-  // server.begin();
-
-
 }
 
-void loop() {
+void loop(){
   if (WiFi.status() != WL_CONNECTED) 
   {
     Wifi_connect();
   }
-
+  
   GetCtr();
   ControlRelay(Mode_Temp, TemperatureAvg, Relay_Temp);
   ControlRelay(Mode_Humi, HumidityAvg, Relay_Humi);
+
   mesh.update();
 
-  while (ss.available() > 0) //while data is available
-    if (gps.encode(ss.read())) //read gps data
-    {
-      if (gps.location.isValid()) //check whether gps location is valid
-      {
-        latitude = gps.location.lat();
-        lat_str = String(latitude , 6); // latitude location is stored in a string
-        longitude = gps.location.lng();
-        lng_str = String(longitude , 6); //longitude location is stored in a string
-      }
-      // Serial.println("Lat: " +lat_str+" | Lng: "+ lng_str);
-      // delay(1000);
-    }
-  
-  // khởi tạo một biến lưu giá trị hiện tại của Timer
   unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis >= 15*interval) {
+  if(ss.available()){
+    while (ss.available() > 0){ //while data is available
+      if (gps.encode(ss.read())) //read gps data
+      {
+        if (gps.location.isValid()) //check whether gps location is valid
+        {
+          latitude = gps.location.lat();
+          lat_str = String(latitude , 6); // latitude location is stored in a string
+          longitude = gps.location.lng();
+          lng_str = String(longitude , 6); //longitude location is stored in a string
+        }
+        // Serial.println("Lat: " +lat_str+" | Lng: "+ lng_str);
+        // delay(1000);
+      }
+    }
+    if (currentMillis - previousMillis >= 15*interval) {
     previousMillis = currentMillis;
-
-    // while (ss.available() > 0) //while data is available
-    //   if (gps.encode(ss.read())) //read gps data
-    //   {
-    //     if (gps.location.isValid()) //check whether gps location is valid
-    //     {
-    //       latitude = gps.location.lat();
-    //       lat_str = String(latitude , 6); // latitude location is stored in a string
-    //       longitude = gps.location.lng();
-    //       lng_str = String(longitude , 6); //longitude location is stored in a string
-    //     }
-    //   }
-
     Post_to_DB("location");
+    }
+  }
+  
+  if (currentMillis - pre >= 5*interval) {
+    if(consider == 0){
+      // mesh.sendBroadcast("Begin");
+      // pre = currentMillis;
+      // consider = 0;
+      sendMessage();
+    }
   }
 }
 
-void Post_to_DB(String Table)
-{
+void Post_to_DB(String Table){
   if(WiFi.status()== WL_CONNECTED)
     {
       String  postData;
@@ -221,33 +191,30 @@ void Post_to_DB(String Table)
       }
   }
 
-void receivedCallback(const uint32_t &from, const String &msg)
-{
+void receivedCallback(const uint32_t &from, const String &msg){
   Serial.println();
   Serial.print("Message = ");
   Serial.print(msg);
+  consider = 1;
   if(msg == "Again"){
     mesh.sendSingle(from, "Begin");
   } else if(msg == "Warn"){
-    
+    sendMessage();
   } else{
     String json = msg.c_str();
     DynamicJsonDocument doc(1024);
     DeserializationError error = deserializeJson(doc, json);
-
-    if (error)
-    {
-      Serial.print("deserializeJson() failed: ");
-      Serial.println(error.c_str());
-      mesh.sendSingle(from, "Error");
-    }
-    else
-    {
+    if (error){
+      // Serial.print("deserializeJson() failed: ");
+      // Serial.println(error.c_str());
+      // mesh.sendSingle(from, "Error");
+    } else{
       Node = doc["Node"];
       Temperature = doc["Temperature"];
       Humidity = doc["Humidity"];
       // String x = String(Node) + "," + String(Temperature) + "," + String(Humidity);
       // Serial.println("data php : " +x);
+      mesh.sendSingle(from, "Ok");
       SaveValue();
     }
   }
@@ -310,14 +277,16 @@ void newConnectionCallback(uint32_t nodeId) {
 
 void changedConnectionCallback() {
   // Serial.printf("Changed connections\n");
+  SimpleList<uint32_t> nodelist;
+  nodelist = mesh.getNodeList();
+  Quantity = nodelist.size();
 }
 
 void nodeTimeAdjustedCallback(int32_t offset) {
     // Serial.printf("Adjusted time %u. Offset = %d\n", mesh.getNodeTime(),offset);
 }
 
-void mesh_setup()
-{
+void mesh_setup(){
   mesh.setDebugMsgTypes(ERROR | STARTUP | CONNECTION); // set before init() so that you can see startup messages
   // Channel set to 6. Make sure to use the same channel for your mesh and for you other
   // network (STATION_SSID)
@@ -332,8 +301,7 @@ void mesh_setup()
   taskSendMessage.enable();
 }
 
-void Wifi_connect()
-{
+void Wifi_connect(){
   delay(1000);
   WiFi.begin(ssid, pass);     //Connect to your WiFi router
   Serial.println("");
@@ -353,8 +321,7 @@ void Wifi_connect()
   delay(1000);
 }
 
-void GetCtr()
-{
+void GetCtr(){
   http.begin(client, pathGetCtr);     //Specify request destination
   int httpCode = http.GET();       //Send the request
   //Get the response payload from server
@@ -373,8 +340,7 @@ void GetCtr()
   }
 }
 
-void CtrMode(String payload)
-{
+void CtrMode(String payload){
   DynamicJsonDocument cmdJson(1024);
   DeserializationError error = deserializeJson(cmdJson, payload);  
   if (error)
