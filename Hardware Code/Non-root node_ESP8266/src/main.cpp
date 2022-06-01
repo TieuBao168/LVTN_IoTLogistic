@@ -57,7 +57,7 @@ void receivedCallback(uint32_t from, String &msg ) {
   Serial.print("Message = ");
   Serial.print(msg);
 
-  if((msg == "Begin")||(msg == "Error")){
+  if(msg == "Begin"){
     sendMessage(from, "Single");
     idRootnode = from;
     consider[1] = 1;

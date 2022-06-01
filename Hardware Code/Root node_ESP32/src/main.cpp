@@ -10,7 +10,7 @@
 HTTPClient http;    //Declare object of class HTTPClient
 WiFiClient client;
 
-String apiKeyValue = "IoTLogistic", Vehicle = "2";
+String apiKeyValue = "IoTLogistic", Vehicle = "1";
 
 TinyGPSPlus gps;  // The TinyGPS++ object
 SoftwareSerial ss(3,1); // The serial connection to the GPS device  (Rx,Tx)
@@ -33,7 +33,7 @@ String Mode_Temp, Mode_Humi;
 
 // set pin numbers
 int Relay_Temp = 2;
-int Relay_Humi = 0;   // the number of the pushbutton pin
+int Relay_Humi = 4;   // the number of the pushbutton pin
 // #define ledPin  2       // the number of the LED pin
 // Giá trị lần cuối cùng được cập nhật
 unsigned long previousMillis = 0, pre = 0; 
@@ -52,7 +52,7 @@ void Post_to_DB(String Table);
 void SaveValue();
 
 // Đường dẫn file Back-end
-const char* pathGetCtr = "http://luanvanlogistic.highallnight.com/app/control2/control2.json";
+const char* pathGetCtr = "http://luanvanlogistic.highallnight.com/app/control1/control1.json";
 const char* LinkWriteData = "http://luanvanlogistic.highallnight.com/app/postdata.php";
 
 // Control Relay
@@ -165,15 +165,14 @@ void Post_to_DB(String Table){
         "&Temperature3=" + TempArr[2] + "&Humidity3=" + HumiArr[2] +
         "&Temperature4=" + TempArr[3] + "&Humidity4=" + HumiArr[3];
       }
-           
+      
       http.begin(client, LinkWriteData); //Specify request destination
       http.addHeader("Content-Type", "application/x-www-form-urlencoded"); //Specify content-type header
     
       int httpCode = http.POST(postData); //Send the request
       // String payload = http.getString(); //Get the response payload
       
-      if (httpCode == 200) 
-      { 
+      if (httpCode == 200) { 
         Serial.println("Values uploaded successfully. " + Table); 
         Serial.println(httpCode); 
         // String webpage = http.getString();    // Get html webpage output and store it in a string
@@ -186,10 +185,10 @@ void Post_to_DB(String Table){
         return; 
       }
       http.end();
-    } else{
-      Serial.println("Connect Wifi Error!!!");
-      }
+  } else{
+    Serial.println("Connect Wifi Error!!!");
   }
+}
 
 void receivedCallback(const uint32_t &from, const String &msg){
   Serial.println();
