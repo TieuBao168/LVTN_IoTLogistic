@@ -1,10 +1,11 @@
 <?php   
-$connect = mysqli_connect("localhost", "highalln_iot_project", "Hihomhinh99", "highalln_iot_project");   
+$connect = mysqli_connect("localhost", "highalln_iot_project", "Hihomhinh99", "highalln_iot_project");  
 $sql = "SELECT * FROM info2";
-$sql1 = "SELECT * FROM iot_project2";    
+$sql1 = "SELECT * FROM location2"; 
 $result = mysqli_query($connect, $sql);
-$result1 = mysqli_query($connect, $sql1);  
-$json_array = array();  
+$result1 = mysqli_query($connect, $sql1);
+$json_array = array();
+
 while($row = mysqli_fetch_array($result)){
     $id = $row['id'];
     $ten = $row['ten_tai_xe'];
@@ -32,19 +33,16 @@ while($row = mysqli_fetch_array($result)){
 
 while($row = mysqli_fetch_array($result1)){
     $id = $row['id'];
-    $nhiet_do = $row['nhiet_do'];
-    $do_am = $row['do_am'];
     $kinh_do = $row['kinh_do'];
     $vi_do = $row['vi_do'];
     $thoi_gian_doc = $row['created_at'];
 	$json_array[] = array(
-	    'ID'=> $id,
-		'Nhiet do'=> $nhiet_do,
-		'Do am' => $do_am,
+		'ID'=> $id,
 		'Kinh do'=> $kinh_do, 
 		'Vi do'=> $vi_do,
 		'Thoi gian doc' => $thoi_gian_doc
 	);
 }
+
 echo json_encode($json_array)
- ?>
+?>
