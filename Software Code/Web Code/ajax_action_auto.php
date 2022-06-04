@@ -1,4 +1,4 @@
-<?php include('ab.php');?>
+
 <?php
 	
 	$dbhost = 'localhost';

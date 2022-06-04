@@ -13,10 +13,7 @@ while($row = mysqli_fetch_array($result)){
     $xuat_phat = $row['xuat_phat'];
     $dich_den = $row['dich_den'];
     $thoi_gian = $row['thoi_gian'];
-    $kinh_do_xp = $row['kinh_do_xuat_phat'];
-    $vi_do_xp = $row['vi_do_xuat_phat'];
-    $kinh_do_dd = $row['kinh_do_dich_den'];
-    $vi_do_dd = $row['vi_do_dich_den'];
+    $tin_nhan = $row['tin_nhan'];
 	$json_array[] = array(
 	    'ID'=> $id,
 		'Ten'=> $ten, 
@@ -24,10 +21,7 @@ while($row = mysqli_fetch_array($result)){
 		'Xuat phat' => $xuat_phat,
 		'Dich den' => $dich_den,
 		'Thoi gian' => $thoi_gian,
-		'Kinh do xuat phat' => $kinh_do_xp,
-		'Vi do xuat phat' => $vi_do_xp,
-		'Kinh do dich den' => $kinh_do_dd,
-		'Vi do dich den' => $vi_do_dd
+		'Tin nhan' => $tin_nhan
 	);
 }
 

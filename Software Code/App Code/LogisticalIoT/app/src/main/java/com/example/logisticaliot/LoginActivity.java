@@ -36,7 +36,7 @@ public class LoginActivity extends AppCompatActivity {
     EditText TaikhoanText,MatkhauText,EmailText;
     Button LoginBtn;
     ProgressDialog progressDialog;
-    public static String GetDataLocation_Url = "", Control_Url ="", ControlSetup_Url="", GetSensor_Url ="";
+    public static String GetDataLocation_Url = "", Control_Url ="", ControlSetup_Url="", GetSensor_Url ="", GetInfo_Url ="";
 
 //    String url="https://iotlogistics.000webhostapp.com/App/register.php";
 //    String urls ="https://iotlogistics.000webhostapp.com/App/login.php";
@@ -91,6 +91,7 @@ public class LoginActivity extends AppCompatActivity {
                                     GetSensor_Url=Urls.GETSENSOR1_URL;
                                     Control_Url=Urls.CONTROL1_URL;
                                     ControlSetup_Url=Urls.CONTROLSETUP1_URL;
+                                    GetInfo_Url=Urls.GETINFO1_URL;
                                     progressDialog.dismiss();
 //                                    message("Thanhf coong");
 
@@ -103,6 +104,7 @@ public class LoginActivity extends AppCompatActivity {
                                     GetSensor_Url=Urls.GETSENSOR2_URL;
                                     Control_Url=Urls.CONTROL2_URL;
                                     ControlSetup_Url=Urls.CONTROLSETUP2_URL;
+                                    GetInfo_Url=Urls.GETINFO2_URL;
                                     progressDialog.dismiss();
                                     Intent intent = new Intent();
                                     intent.setClass(LoginActivity.this, DataActivity.class);

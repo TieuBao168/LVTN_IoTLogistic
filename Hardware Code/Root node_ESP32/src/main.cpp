@@ -10,7 +10,7 @@
 HTTPClient http;    //Declare object of class HTTPClient
 WiFiClient client;
 
-String apiKeyValue = "IoTLogistic", Vehicle = "1";
+String apiKeyValue = "IoTLogistic", Vehicle = "2";
 
 TinyGPSPlus gps;  // The TinyGPS++ object
 SoftwareSerial ss(3,1); // The serial connection to the GPS device  (Rx,Tx)
@@ -52,7 +52,7 @@ void Post_to_DB(String Table);
 void SaveValue();
 
 // Đường dẫn file Back-end
-const char* pathGetCtr = "http://luanvanlogistic.highallnight.com/app/control1/control1.json";
+const char* pathGetCtr = "http://luanvanlogistic.highallnight.com/app/control2/control2.json";
 const char* LinkWriteData = "http://luanvanlogistic.highallnight.com/app/postdata.php";
 
 // Control Relay

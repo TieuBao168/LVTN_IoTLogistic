@@ -248,7 +248,7 @@
                             <h3 class="box-title">Biểu đồ đường</h3>
                             <div class="d-md-flex">  
                   <div class="mx-auto" style=" border: 10px #05a38b;width: 1500px;text-align: center;">
-    					<iframe src="chart.php" scrolling="no" style="border:none; width: 1000px; height: 1000px;  overflow: hidden;"></iframe>
+    					<iframe src="chart1.php" scrolling="no" style="border:none; width: 1000px; height: 1000px;  overflow: hidden;"></iframe>
 
     			  </div>  
   				</div>

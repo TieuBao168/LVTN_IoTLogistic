@@ -6,7 +6,7 @@
 
 #define MESH_PREFIX     "IoTLogistic"
 #define MESH_PASSWORD   "IoTLogistic2022"
-#define MESH_PORT   5556
+#define MESH_PORT   5555
 
 DHTesp dht;
 
@@ -29,7 +29,7 @@ void compareData();
 void sendMessage(uint32_t id, String Destination){
   Serial.println();
   DynamicJsonDocument doc(1024);
-  doc["Node"] = 2;
+  doc["Node"] = 4;
   doc["Temperature"] = recent.temperature;
   doc["Humidity"] = recent.humidity;
 

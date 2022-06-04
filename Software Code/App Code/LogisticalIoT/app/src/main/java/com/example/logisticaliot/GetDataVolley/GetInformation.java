@@ -18,6 +18,8 @@ import org.json.JSONObject;
 
 public class GetInformation {
     String strJson = "";
+    String TN;
+    int count = 0;
     public void getJSONArray(Context context, TextView textView){
         // 1.Khởi tạo request
         RequestQueue queue = Volley.newRequestQueue(context);
@@ -29,11 +31,19 @@ public class GetInformation {
                 for (int i=response.length() - 1; i>=0 ; i--){
                     try{
                         JSONObject person = response.getJSONObject(i);
+                        int abc = 0;
                         String Ten = person.getString("Ten");
                         String DienThoai = person.getString("Dien Thoai");
                         String XuatPhat = person.getString("Xuat phat");
                         String DichDen = person.getString("Dich den");
                         String ThoiGian = person.getString("Thoi gian");
+                        String TinNhan = person.getString("Tin nhan");
+                        if(TinNhan.isEmpty()){
+
+                        }else if(count==0){
+                            TN = TinNhan;
+                            count = 1;
+                        }
                         //dua vao chuoi
                         if((Ten.isEmpty())||(DienThoai.isEmpty())||(XuatPhat.isEmpty())||(DichDen.isEmpty())||(ThoiGian.isEmpty())){
                             continue;
@@ -43,6 +53,7 @@ public class GetInformation {
                             strJson += "Xuất phát: " + XuatPhat + "\n";
                             strJson += "Đích đến: " + DichDen + "\n";
                             strJson += "Thời gian khởi hành: " + ThoiGian + "\n";
+                            strJson += "Tin nhắn: " + TN;
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();

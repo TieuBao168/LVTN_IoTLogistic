@@ -201,17 +201,12 @@
                                     <div class="user-content">
                                         <a href="javascript:void(0)"><img src="plugins/images/bao.jpg"
                                                 class="thumb-lg img-circle" alt="img"></a>
-                                        <h4 class="text-white mt-2">Bảo</h4>
+                                        <h4 class="text-white mt-2"></h4>
                                         
                                     </div>
                                 </div>
                             </div>
-                            <div class="user-btm-box mt-5 d-md-flex">
-                               
-                                <div class="col-md-15 col-sm-15 text-center">
-                                    <h1>Cù Tiểu Bảo</h1>
-                                </div>
-                            </div>
+                            
                         </div>
                     </div>
                     <!-- Column -->
@@ -225,12 +220,7 @@
                                         <div class="col-md-12 border-bottom p-0">   <?php include('info2.php');?>
                                             <h3><?php echo $ten_tai_xe; ?></h3>
                                     </div>
-                                    <div class="form-group mb-4">
-                                        <label for="example-email" class="col-md-12 p-0">Email</label>
-                                        <div class="col-md-12 border-bottom p-0">
-                                            <H3>phong.phamthuong@hcmut.edu.vn</H3>
-                                        </div>
-                                    </div>
+                                    
                                     
                                     <div class="form-group mb-4">
                                         <label class="col-md-12 p-0">Số Điện Thoại</label>
@@ -241,10 +231,16 @@
                                         <h3><?php echo $thoi_gian; ?></h3>
                                     </div>
                                     <div class="form-group mb-4">
-                                        <label class="col-md-12 p-0">Tin nhắn</label>
-                                        <div class="col-md-12 border-bottom p-0">
-                                            <textarea rows="5" class="form-control p-0 border-0"> <?php echo $tin_nhan; ?></textarea>
-                                        </div>
+                                        <label class="col-md-12 p-0">Địa điểm xuất phát</label>
+                                        <h3><?php echo $xuat_phat; ?></h3>
+                                    </div>
+                                    <div class="form-group mb-4">
+                                        <label class="col-md-12 p-0">Đích Đến</label>
+                                        <h3><?php echo $dich_den; ?></h3>
+                                    </div>
+                                    <div class="form-group mb-4">
+                                        <label class="col-md-12 p-0">tin nhắn từ ADMIN</label>
+                                        <h3><?php echo $tin_nhan; ?></h3>
                                     </div>
                                     
                                 </form>

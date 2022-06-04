@@ -50,11 +50,7 @@
             android:exported="true"
             tools:ignore="DuplicateActivity">
         </activity>
-        <activity
-            android:name=".DisplayActivity"
-            android:exported="true"
-            tools:ignore="DuplicateActivity">
-        </activity>
+
     </application>
 
 </manifest>

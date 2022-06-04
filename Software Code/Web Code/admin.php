@@ -26,8 +26,8 @@
 			<div class="col-md-12"></div>
 				<h3>QUẢN LÝ DỮ LIỆU XE SỐ 1</h3>
 				<form method="GET" id="data1">
-					<label>TÊN TÀI SẾ</label>
-					<input type="text" class="form-control" placeholder="nhập tên tài sễ" id="ten_tai_xe">
+					<label>TÊN TÀI XẾ</label>
+					<input type="text" class="form-control" placeholder="nhập tên tài xế" id="ten_tai_xe">
 					<br>
 					<label>XUẤT PHÁT</label>
 					<input type="text" class="form-control" placeholder="vị trí xuất phát" id="xuat_phat">

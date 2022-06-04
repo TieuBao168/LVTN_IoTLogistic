@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -12,6 +14,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -28,6 +31,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONArray;
@@ -41,6 +45,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -49,10 +54,14 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     Button DataBtn,ControlBtn;
     Marker marker;
-    String TenTaiXe, DiaDiemXuatPhat, DiaDiemDichDen;
+    String TenTaiXe, DiaDiemXuatPhat, DiaDiemDichDen, Xuat, Dich;
     Double Kinhdo_hientai, Vido_hientai, Kinhdo, Vido, Kinhdo_xp, Vido_xp, Kinhdo_dd, Vido_dd;
     LatLng Xuatphat, Dichden;
     String URL;
+    Geocoder geocoder;
+    List<Address> addressList_Xuat, addressList_Dich;
+    Polyline polyline = null;
+    List<LatLng> LatLngList = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,6 +73,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         ControlBtn = findViewById(R.id.Control_Btn);
 
         URL= LoginActivity.GetDataLocation_Url;
+
+        geocoder = new Geocoder(this);
 
         ControlBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -124,19 +135,26 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     try {
                         JSONObject person = response.getJSONObject(i);
 
-                        String preKinhdo_xp = person.getString("Kinh do xuat phat");
-                        String preVido_xp = person.getString("Vi do xuat phat");
-                        String preKinhdo_dd = person.getString("Kinh do dich den");
-                        String preVido_dd = person.getString("Vi do dich den");
+                        Xuat = person.getString("Xuat phat");
+                        Dich = person.getString("Dich den");
 
-
-                        if ((preKinhdo_xp.isEmpty())||(preVido_xp.isEmpty())||(preKinhdo_dd.isEmpty())||(preVido_dd.isEmpty())){
+                        if ((Xuat.isEmpty())||(Dich.isEmpty())){
                             continue;
                         }else{
-                            Kinhdo_xp = Double.parseDouble(preKinhdo_xp);
-                            Vido_xp = Double.parseDouble(preVido_xp);
-                            Kinhdo_dd = Double.parseDouble(preKinhdo_dd);
-                            Vido_dd = Double.parseDouble(preVido_dd);
+                            try {
+                                addressList_Xuat = geocoder.getFromLocationName(Xuat, 1);
+                                addressList_Dich = geocoder.getFromLocationName(Dich, 1);
+                                if(addressList_Xuat != null){
+                                    Kinhdo_xp = Math.round(addressList_Xuat.get(0).getLatitude()*1000000.0)/1000000.0;
+                                    Vido_xp = Math.round(addressList_Xuat.get(0).getLongitude()*1000000.0)/1000000.0;
+                                }
+                                if(addressList_Dich != null){
+                                    Kinhdo_dd = Math.round(addressList_Dich.get(0).getLatitude()*1000000.0)/1000000.0;
+                                    Vido_dd = Math.round(addressList_Dich.get(0).getLongitude()*1000000.0)/1000000.0;
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                             break;
                         }
 
@@ -144,6 +162,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         e.printStackTrace();
                     }
                 }
+
+//                Toast.makeText(MapActivity.this,Kinhdo_xp.toString() +" "+Vido_xp.toString(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MapActivity.this,Kinhdo_dd.toString() +" "+Vido_dd.toString(), Toast.LENGTH_SHORT).show();
                 Xuatphat = new LatLng(Kinhdo_xp, Vido_xp);
                 Dichden = new LatLng(Kinhdo_dd, Vido_dd);
 
@@ -151,8 +172,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(xe, 14));
 
                 if((Xuatphat!=null)&&(Dichden!=null)){
-                    mMap.addMarker(new MarkerOptions().position(Xuatphat));
-                    mMap.addMarker(new MarkerOptions().position(Dichden));
+                    mMap.addMarker(new MarkerOptions().position(Xuatphat).title(Xuat));
+                    mMap.addMarker(new MarkerOptions().position(Dichden).title(Dich));
 
                     String url = getMapsApiDirectionsUrl(Xuatphat, Dichden);
 
@@ -170,6 +191,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
 
         RequestQueue queue1 = Volley.newRequestQueue(this);
+        RequestQueue queue2 = Volley.newRequestQueue(this);
         new CountDownTimer(1000000000,5000) {
             @Override
             public void onTick(long millisUntilFinished) {
@@ -227,7 +249,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                             .position(xe_hientai)
                                             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
                                     );
-
                                 }
                             } else {
                                 marker = mMap.addMarker(new MarkerOptions()
@@ -238,13 +259,61 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                 );
                             }
                         }
-                        }
+                    }
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                     }
                 });
                 queue1.add(req1);
+
+                JsonArrayRequest req2 = new JsonArrayRequest(Request.Method.GET, URL, null, new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        // chuyen mang thanh chuoi
+                        for (int i=response.length() - 1; i>=0; i--) {
+                            try {
+                                JSONObject vitri = response.getJSONObject(i);
+
+                                String prKinhdo = vitri.getString("Kinh do");
+                                String prVido = vitri.getString("Vi do");
+                                double Ki = Double.parseDouble(prKinhdo);
+                                double Vi = Double.parseDouble(prVido);
+
+                                LatLng Loca = new LatLng(Ki, Vi);
+
+                                if((Ki==0.000000)&&(Vi==0.000000)){
+                                    continue;
+                                } else{
+                                    LatLngList.add(Loca);
+                                    PolylineOptions polylineOption = new PolylineOptions()
+                                            .addAll(LatLngList).clickable(true);
+                                    polylineOption.width(4);
+                                    polylineOption.color(Color.BLUE);
+                                    polyline = map.addPolyline(polylineOption);
+                                }
+
+                                if ((prKinhdo.isEmpty())||(prVido.isEmpty())){
+//                                    continue;
+//                                }else{
+//                                    Kinhdo = Double.parseDouble(preKinhdo);
+//                                    Vido = Double.parseDouble(preVido);
+                                    break;
+                                }
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        LatLngList.clear();
+                    }
+
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                    }
+                });
+                queue2.add(req2);
             }
             @Override
             public void onFinish() {
@@ -433,7 +502,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
                 polyLineOptions.addAll(points);
                 polyLineOptions.width(4);
-                polyLineOptions.color(Color.BLUE);
+                polyLineOptions.color(Color.RED);
             }
             if(polyLineOptions!=null) {
                 mMap.addPolyline(polyLineOptions);

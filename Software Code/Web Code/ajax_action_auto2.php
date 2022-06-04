@@ -1,3 +1,4 @@
+
 <?php
 	
 	$dbhost = 'localhost';
@@ -6,10 +7,18 @@
 	$dbpass = 'Hihomhinh99';
 $connect = @mysqli_connect($dbhost,$dbuser,$dbpass,$dbname);
 		
-		if(isset($_GET['tem1'])){
-			$tem1 = $_GET['tem1'];
-			
+		if(isset($_GET['data'])){
+			$tem1 = $_GET['data'];
 		$result = mysqli_query($connect,"INSERT INTO control2 (nhiet_do) VALUES ('$tem1')");
+
+
+        $jsonString = file_get_contents("app/control2/control2.json");
+        $data = json_decode($jsonString, true); //take a json encode string and convert it into a PHP variable
+	
+        $data['Nhiet do'] = $tem1; 
+                                 
+    	$newJsonString = json_encode($data);
+    	file_put_contents("app/control2/control2.json", $newJsonString);
 		}
 	
 	?>

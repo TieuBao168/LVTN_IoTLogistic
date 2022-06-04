@@ -2,14 +2,16 @@ package com.example.logisticaliot;
 
 public class Urls {
     public static final String ROOT_URL = "http://luanvanlogistic.highallnight.com/app/";
-    public static final String REGISTER_URL = ROOT_URL+"register.php";
+//    public static final String REGISTER_URL = ROOT_URL+"register.php";
     public static final String LOGIN_URL = ROOT_URL+"login.php";
 
+    public static final String GETINFO1_URL = ROOT_URL+"getinfo1.php";
     public static final String GETDATALOCATION1_URL = ROOT_URL+"getdatalocation1.php";
     public static final String GETSENSOR1_URL = ROOT_URL+"getsensor1.php";
     public static final String CONTROL1_URL = ROOT_URL+"control1.php";
     public static final String CONTROLSETUP1_URL = ROOT_URL+"control1/control1.json";
 
+    public static final String GETINFO2_URL = ROOT_URL+"getinfo2.php";
     public static final String GETDATALOCATION2_URL = ROOT_URL+"getdatalocation2.php";
     public static final String GETSENSOR2_URL = ROOT_URL+"getsensor2.php";
     public static final String CONTROL2_URL = ROOT_URL+"control2.php";

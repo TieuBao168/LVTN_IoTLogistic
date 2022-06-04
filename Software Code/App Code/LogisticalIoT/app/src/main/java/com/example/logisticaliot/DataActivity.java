@@ -188,7 +188,7 @@ public class DataActivity extends AppCompatActivity {
                         if(preValue.isEmpty()){
                             dataSet.add(new Entry(i, 0));
                         }else{
-                            Value = Float.parseFloat(preValue);
+                            Value = (float)(Math.round(Float.parseFloat(preValue)*10.0)/10.0);
                             dataSet.add(new Entry(i, Value));
                         }
                     } catch (JSONException e) {
