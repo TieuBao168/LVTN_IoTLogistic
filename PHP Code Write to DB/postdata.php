@@ -7,7 +7,7 @@ if ($connect->connect_error) {
 } 
 $api_key_value = "IoTLogistic";
  
-$api_key = $Vehicle = $Table = $Lati = $Lngi = "";
+$api_key = $Vehicle = $Table = $Lati = $Lngi = $Warn = "";
 $Temp = array();
 $Humi = array();
 date_default_timezone_set('Asia/Ho_Chi_Minh');
@@ -20,6 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if($api_key == $api_key_value) {
         $Table = test_input($_POST["Table"]);
         $Vehicle = test_input($_POST["Vehicle"]);
+        
         if($Table == "location"){
             $Lati = test_input($_POST["Latitude"]);
             $Lngi = test_input($_POST["Longitude"]);
@@ -34,12 +35,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $H = "Humidity"; $H .= $i;
                 $Temp[$i] = test_input($_POST[$T]);
                 $Humi[$i] = test_input($_POST[$H]);
+                
             }
-
+            $Warn = test_input($_POST["Warn"]);
+            
+            
             $Table .= $Vehicle;
             
-            $val = " (nhiet_do, do_am, nhiet_do1, do_am1, nhiet_do2, do_am2, nhiet_do3, do_am3, nhiet_do4, do_am4, created_at)
-            VALUES ('$Temp[0]', '$Humi[0]', '$Temp[1]', '$Humi[1]', '$Temp[2]', '$Humi[2]', '$Temp[3]', '$Humi[3]', '$Temp[4]', '$Humi[4]', '$timest')";
+            $val = " (nhiet_do, do_am, nhiet_do1, do_am1, nhiet_do2, do_am2, nhiet_do3, do_am3, nhiet_do4, do_am4, canh_bao, created_at)
+            VALUES ('$Temp[0]', '$Humi[0]', '$Temp[1]', '$Humi[1]', '$Temp[2]', '$Humi[2]', '$Temp[3]', '$Humi[3]', '$Temp[4]', '$Humi[4]', '$Warn','$timest')";
             
         } else{
             echo "Wrong table name";

@@ -10,22 +10,21 @@
 HTTPClient http;    //Declare object of class HTTPClient
 WiFiClient client;
 
-String apiKeyValue = "IoTLogistic", Vehicle = "2";
+String apiKeyValue = "IoTLogistic", Vehicle = "1";
 
 TinyGPSPlus gps;  // The TinyGPS++ object
 SoftwareSerial ss(3,1); // The serial connection to the GPS device  (Rx,Tx)
 
 float latitude , longitude;
-String lat_str = "0.000000", lng_str = "0.000000";
+String lat_str = "0.000000", lng_str = "0.000000", warn = "0";
 // WiFiServer server(80);
 
 int cnt = 0, consider = 0;
 int Quantity = 0;
 // int firsttime = 0;
 
-float Temperature, Humidity, RSSI;
+float Temperature, Humidity;
 int Node;
-String data_rx="";
 
 float TemperatureAvg, HumidityAvg = 0;
 float TempArr[4], HumiArr[4];
@@ -52,13 +51,13 @@ void Post_to_DB(String Table);
 void SaveValue();
 
 // Đường dẫn file Back-end
-const char* pathGetCtr = "http://luanvanlogistic.highallnight.com/app/control2/control2.json";
+const char* pathGetCtr = "http://luanvanlogistic.highallnight.com/app/control1/control1.json";
 const char* LinkWriteData = "http://luanvanlogistic.highallnight.com/app/postdata.php";
 
 // Control Relay
 void GetCtr();
 void CtrMode(String payload);
-void ControlRelay(String Mode, float CompareValue, int Relay);
+void ControlRelay(String Mode, int CompareValue, int Relay);
 String  payload,Pre_payload="";
 
 //Mesh network
@@ -67,7 +66,7 @@ painlessMesh mesh;
 
 #define MESH_PREFIX     "IoTLogistic"
 #define MESH_PASSWORD   "IoTLogistic2022"
-#define MESH_PORT   5556
+#define MESH_PORT   5555
 #define HOSTNAME "MeshNetwork" 
 
 void receivedCallback(const uint32_t &from, const String &msg);
@@ -88,15 +87,15 @@ void sendMessage(){
     pre = millis();
     consider = 0;
   }
-  taskSendMessage.setInterval(TASK_SECOND * 30);
+  taskSendMessage.setInterval(TASK_SECOND * 15);
 }
 
 void setup(){
   Serial.begin(115200);
   ss.begin(9600);
-  Serial.println();
-  Serial.println("--------------------------------------------------------");
-  Serial.println("----------------------Start here!-----------------------");
+  // Serial.println();
+  // Serial.println("--------------------------------------------------------");
+  // Serial.println("----------------------Start here!-----------------------");
 
   // initialize the pushbutton pin as an input
   pinMode(Relay_Temp, OUTPUT);
@@ -113,8 +112,8 @@ void loop(){
   }
   
   GetCtr();
-  ControlRelay(Mode_Temp, TemperatureAvg, Relay_Temp);
-  ControlRelay(Mode_Humi, HumidityAvg, Relay_Humi);
+  ControlRelay(Mode_Temp, int(TemperatureAvg), Relay_Temp);
+  ControlRelay(Mode_Humi, int(HumidityAvg), Relay_Humi);
 
   mesh.update();
 
@@ -134,17 +133,14 @@ void loop(){
         // delay(1000);
       }
     }
-    if (currentMillis - previousMillis >= 15*interval) {
+    if (currentMillis - previousMillis >= 30*interval) {
     previousMillis = currentMillis;
     Post_to_DB("location");
     }
   }
   
-  if (currentMillis - pre >= 5*interval) {
+  if (currentMillis - pre >= 2*interval) {
     if(consider == 0){
-      // mesh.sendBroadcast("Begin");
-      // pre = currentMillis;
-      // consider = 0;
       sendMessage();
     }
   }
@@ -163,7 +159,8 @@ void Post_to_DB(String Table){
         "&Temperature1=" + TempArr[0] + "&Humidity1=" + HumiArr[0] +
         "&Temperature2=" + TempArr[1] + "&Humidity2=" + HumiArr[1] +
         "&Temperature3=" + TempArr[2] + "&Humidity3=" + HumiArr[2] +
-        "&Temperature4=" + TempArr[3] + "&Humidity4=" + HumiArr[3];
+        "&Temperature4=" + TempArr[3] + "&Humidity4=" + HumiArr[3] +
+        "&Warn=" + warn;
       }
       
       http.begin(client, LinkWriteData); //Specify request destination
@@ -185,8 +182,9 @@ void Post_to_DB(String Table){
         return; 
       }
       http.end();
+      warn = "0";
   } else{
-    Serial.println("Connect Wifi Error!!!");
+    // Serial.println("Connect Wifi Error!!!");
   }
 }
 
@@ -198,7 +196,8 @@ void receivedCallback(const uint32_t &from, const String &msg){
   if(msg == "Again"){
     mesh.sendSingle(from, "Begin");
   } else if(msg == "Warn"){
-    sendMessage();
+    warn = "1";
+    mesh.sendBroadcast("Begin");
   } else{
     String json = msg.c_str();
     DynamicJsonDocument doc(1024);
@@ -303,14 +302,13 @@ void mesh_setup(){
 void Wifi_connect(){
   delay(1000);
   WiFi.begin(ssid, pass);     //Connect to your WiFi router
-  Serial.println("");
+  // Serial.println("");
 
-  Serial.print("Connecting");
+  // Serial.print("Connecting");
   //Wait for connection
   while (WiFi.status() != WL_CONNECTED) 
   {
     Serial.print(".");
-    // Blink_led();
     delay(1000);
   }
 
@@ -344,8 +342,8 @@ void CtrMode(String payload){
   DeserializationError error = deserializeJson(cmdJson, payload);  
   if (error)
   {
-    Serial.print("deserializeJson() failed: ");
-    Serial.println(error.c_str());
+    // Serial.print("deserializeJson() failed: ");
+    // Serial.println(error.c_str());
   }
   else
   {
@@ -358,7 +356,7 @@ void CtrMode(String payload){
   }
 }
 
-void ControlRelay(String Mode, float CompareValue, int Relay){
+void ControlRelay(String Mode, int CompareValue, int Relay){
   if (Mode == "ON"){
       digitalWrite(Relay, HIGH);
     } else if(Mode == "OFF"){

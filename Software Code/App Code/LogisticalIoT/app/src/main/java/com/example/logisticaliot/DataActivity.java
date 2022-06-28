@@ -1,12 +1,14 @@
 package com.example.logisticaliot;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.View;
@@ -20,6 +22,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -46,10 +50,10 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class DataActivity extends AppCompatActivity {
-    Button MapBtn, DataBtn, ControlBtn, HistoryBtn;
+    Button MapBtn, ControlBtn, HistoryBtn;
     TextView ThongtinView;
     LineChart lineChart_Nhietdo, lineChart_Doam;
-    Float Nhietdo, Doam, Value;
+    Float Value;
     String URL;
     Spinner Spinner;
     Integer LockPosition;
@@ -64,14 +68,11 @@ public class DataActivity extends AppCompatActivity {
         ThongtinView = findViewById(R.id.ThongtinView);
         lineChart_Nhietdo = findViewById(R.id.NhietdoChart);
         lineChart_Doam = findViewById(R.id.DoamChart);
-//        AnhsangView = findViewById(R.id.AnhsangView);
         MapBtn = findViewById(R.id.Map_Btn);
-        DataBtn = findViewById(R.id.Data_Btn);
         ControlBtn = findViewById(R.id.Control_Btn);
         HistoryBtn = findViewById(R.id.History_Btn);
         Spinner = (Spinner)findViewById(R.id.spinner);
         URL = LoginActivity.GetSensor_Url;
-//        URL = "http://luanvanlogistic.highallnight.com/app/getdata1.php";
 
         GetInformation fetch = new GetInformation();
         fetch.getJSONArray(DataActivity.this,ThongtinView);
@@ -121,6 +122,7 @@ public class DataActivity extends AppCompatActivity {
                             default:
                                 break;
                         }
+                        GetWarn();
                     }
                     @Override
                     public void onFinish() {
@@ -135,12 +137,11 @@ public class DataActivity extends AppCompatActivity {
             }
         });
 
-//        DataBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//            sendNotification();
-//            }
-//        });
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            NotificationChannel channel = new NotificationChannel("Thông báo", "Thông báo", NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            manager.createNotificationChannel(channel);
+        }
 
         MapBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -255,24 +256,36 @@ public class DataActivity extends AppCompatActivity {
         queue.add(req);
     }
 
-//    void sendNotification() {
-//        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
-//
-//        Notification notification = new Notification.Builder(this)
-//                .setContentTitle("Nhiệt độ giảm đột ngột")
-//                .setContentText("Message push notification")
-//                .setSmallIcon(R.drawable.logo)
-////                .setLargeIcon(bitmap)
-//                .build();
-//
-////        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-////        if(notificationManager != null) {
-////            notificationManager.notify(NOTIFICATION_ID, notification);
-////        }
-//    }
-//
-//    private int getNotificationId(){
-//        return (int) new Date().getTime();
-//    }
-//
+    private void GetWarn() {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        // 2.truyền đường dẫn vào request
+        JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, URL,null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                try {
+                    JSONObject person = response.getJSONObject(response.length()-1);
+                    String preWarn = person.getString("Canh bao");
+                    if(preWarn.equals("1")){
+                            NotificationCompat.Builder builder = new NotificationCompat.Builder(DataActivity.this, "Thông báo");
+                            builder.setSmallIcon(R.drawable.logo);
+                            builder.setContentTitle("Cảnh báo");
+                            builder.setContentText("Nhiệt độ hoặc độ ẩm thay đổi bất thường");
+                            builder.setAutoCancel(true);
+
+                            NotificationManagerCompat managerCompat = NotificationManagerCompat.from(DataActivity.this);
+                            managerCompat.notify(1, builder.build());
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+            }
+        });
+        //4. add
+        queue.add(req);
+    }
 }

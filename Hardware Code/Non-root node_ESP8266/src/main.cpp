@@ -13,6 +13,7 @@ DHTesp dht;
 unsigned long previousMillis, pre, precious = 0;  
 const long interval = 1000; // giá trị delay (milliseconds)
 int consider[2] = {1,1};
+int skip = 0;
 uint32_t idRootnode;
 
 typedef struct{
@@ -29,7 +30,7 @@ void compareData();
 void sendMessage(uint32_t id, String Destination){
   Serial.println();
   DynamicJsonDocument doc(1024);
-  doc["Node"] = 4;
+  doc["Node"] = 2;
   doc["Temperature"] = recent.temperature;
   doc["Humidity"] = recent.humidity;
 
@@ -89,8 +90,8 @@ void setup() {
   dht.setup(D3, DHTesp::DHT11);
   recent.temperature = roundf(dht.getTemperature()*100)/100;
   recent.humidity = roundf(dht.getHumidity()*100)/100;
-  previous.temperature = recent.temperature;
-  previous.humidity = recent.humidity;
+  // previous.temperature = recent.temperature;
+  // previous.humidity = recent.humidity;
 
   mesh.setDebugMsgTypes( ERROR | STARTUP );  
   mesh.init( MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT );
@@ -107,26 +108,31 @@ void loop() {
   mesh.update();
   
   unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis >= 5*interval) {
+  if (currentMillis - previousMillis >= 10*interval) {
     previousMillis = currentMillis;
     compareData();
   }
-  if (currentMillis - pre >= 5*interval) {
-    if(consider[0] == 0){
-      sendMessage(idRootnode, "Single");
-    }
-  }
-  if (currentMillis - precious >= 5*interval) {
-    if(consider[1] == 0){
-      mesh.sendBroadcast("Warn");
-      consider[1] = 0; precious = currentMillis;
-    }
-  }
+  // if (currentMillis - pre >= 5*interval) {
+  //   if(consider[0] == 0){
+  //     sendMessage(idRootnode, "Single");
+  //   }
+  // }
+  // if (currentMillis - precious >= 5*interval) {
+  //   if(consider[1] == 0){
+  //     mesh.sendBroadcast("Warn");
+  //     consider[1] = 0; precious = currentMillis;
+  //   }
+  // }
 }
 
 void compareData(){
   recent.humidity = roundf(dht.getHumidity()*100)/100;
   recent.temperature = roundf(dht.getTemperature()*100)/100;
+  if(skip==0){
+    previous.temperature = recent.temperature;
+    previous.humidity = recent.humidity;
+    skip=1;
+  }
   if((abs(recent.temperature - previous.temperature) > 2.0)||
   (abs(recent.humidity - previous.humidity) > 5.0)){
     mesh.sendBroadcast("Warn");

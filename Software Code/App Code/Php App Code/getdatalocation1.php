@@ -2,8 +2,10 @@
 $connect = mysqli_connect("localhost", "highalln_iot_project", "Hihomhinh99", "highalln_iot_project");  
 $sql = "SELECT * FROM info1";
 $sql1 = "SELECT * FROM location1"; 
+
 $result = mysqli_query($connect, $sql);
 $result1 = mysqli_query($connect, $sql1);
+
 $json_array = array();
 
 while($row = mysqli_fetch_array($result)){

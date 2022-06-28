@@ -1,11 +1,7 @@
 <?php   
 $connect = mysqli_connect("localhost", "highalln_iot_project", "Hihomhinh99", "highalln_iot_project");  
-$sql = "SELECT * FROM info2";
-$sql1 = "SELECT * FROM location2"; 
-
+$sql = "SELECT * FROM info1";
 $result = mysqli_query($connect, $sql);
-$result1 = mysqli_query($connect, $sql1);
-
 $json_array = array();
 
 while($row = mysqli_fetch_array($result)){
@@ -24,19 +20,6 @@ while($row = mysqli_fetch_array($result)){
 		'Dich den' => $dich_den,
 		'Thoi gian' => $thoi_gian,
 		'Tin nhan' => $tin_nhan
-	);
-}
-
-while($row = mysqli_fetch_array($result1)){
-    $id = $row['id'];
-    $kinh_do = $row['kinh_do'];
-    $vi_do = $row['vi_do'];
-    $thoi_gian_doc = $row['created_at'];
-	$json_array[] = array(
-		'ID'=> $id,
-		'Kinh do'=> $kinh_do, 
-		'Vi do'=> $vi_do,
-		'Thoi gian doc' => $thoi_gian_doc
 	);
 }
 

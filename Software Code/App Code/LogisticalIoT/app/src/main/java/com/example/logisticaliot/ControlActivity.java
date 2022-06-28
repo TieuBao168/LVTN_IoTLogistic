@@ -107,21 +107,6 @@ public class ControlActivity extends AppCompatActivity {
             }
         });
 
-//        new CountDownTimer(1000000000,5000) {
-//            @Override
-//            public void onTick(long millisUntilFinished) {
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        new docJson().execute(LoginActivity.ControlSetup_Url);
-//                    }
-//                });
-//            }
-//            @Override
-//            public void onFinish() {
-//
-//            }
-//        }.start();
         OnBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

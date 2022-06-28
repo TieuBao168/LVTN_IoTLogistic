@@ -16,6 +16,7 @@ while($row = mysqli_fetch_array($result)){
     $do_am3 = $row['do_am3'];
     $nhiet_do4 = $row['nhiet_do4'];
     $do_am4 = $row['do_am4'];
+    $canh_bao = $row['canh_bao'];
     $thoi_gian_doc = $row['created_at'];
 	$json_array[] = array(
 		'ID'=> $id,
@@ -29,6 +30,7 @@ while($row = mysqli_fetch_array($result)){
 		'Do am 3' => $do_am3,
 		'Nhiet do 4' => $nhiet_do4,
 		'Do am 4' => $do_am4,
+		'Canh bao' => $canh_bao,
 		'Thoi gian doc' => $thoi_gian_doc
 	);
 }
